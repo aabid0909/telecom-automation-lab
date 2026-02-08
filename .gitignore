@@ -1,7 +1,12 @@
 # Python
 __pycache__/
 *.pyc
-.env
+
+# Flask / SQLAlchemy runtime
+instance/
+
+# SQLite
+*.db
 
 # Robot Framework outputs
 output.xml
@@ -9,9 +14,7 @@ log.html
 report.html
 robot-tests/results/
 
-# OS
-.DS_Store
-
-# IDE
+# IDE / OS
 .vscode/
 .idea/
+.DS_Store
