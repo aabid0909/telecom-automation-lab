@@ -1,0 +1,59 @@
+pipeline {
+    agent any
+
+    environment {
+        PATH = "$PATH:$HOME/.local/bin"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                echo '📥 Checking out source code'
+                checkout scm
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                echo '📦 Installing Robot Framework dependencies'
+                sh '''
+                    pip3 install --user robotframework robotframework-requests
+                '''
+            }
+        }
+
+        stage('Run API Automation') {
+            steps {
+                echo '▶️ Running Robot Framework API tests'
+                sh '''
+                    cd robot-tests
+                    robot --outputdir results tests/api_tests.robot
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            echo '📊 Publishing Robot Framework reports'
+            archiveArtifacts artifacts: 'robot-tests/results/**/*', fingerprint: true
+
+            publishHTML(target: [
+                reportName: 'Robot Test Report',
+                reportDir: 'robot-tests/results',
+                reportFiles: 'report.html',
+                keepAll: true,
+                alwaysLinkToLastBuild: true
+            ])
+        }
+
+        success {
+            echo '✅ CI pipeline succeeded'
+        }
+
+        failure {
+            echo '❌ CI pipeline failed – backend validation issue'
+        }
+    }
+}
